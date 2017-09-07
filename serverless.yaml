@@ -1,4 +1,4 @@
-service: sls-rest-user-account
+service: sls-rest-accounts-password
 
 frameworkVersion: ">=1.1.0 <2.0.0"
 
@@ -20,6 +20,8 @@ provider:
   runtime: nodejs6.10  
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    REGION: ap-southeast-2
+    APP_SECRET: 1234567890XYz
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -39,11 +41,11 @@ resources:
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: email
-            AttributeType: S
+            AttributeName: Email
+            AttributeType: S            
         KeySchema:
           -
-            AttributeName: email
+            AttributeName: Email
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
@@ -57,10 +59,25 @@ functions:
       - http:
           path: /
           method: get
-  createUser:
-    handler: api/Users/create.create
+          cors: true
+  userCreate:
+    handler: api/Users/methods.create
     events:
       - http:
-          path: api/users
+          path: /user
           method: post
           cors: true
+  userGet:
+    handler: api/Users/methods.get
+    events:
+      - http:
+          path: /user
+          method: get
+          cors: true
+  userToken:
+    handler: api/Users/methods.token
+    events:
+      - http:
+          path: /token
+          method: post
+          cors: true      
